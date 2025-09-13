@@ -1,20 +1,23 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const cookieParser = require('cookie-parser');
 
 const authRoutes = require('./routes/authRoutes');
 const teamRoutes = require('./routes/teamRoutes');
 const otpRoutes = require('./routes/otpRoutes');
 
 const app = express();
+
 const corsOptions = {
-  origin: 'http://localhost:5173', // Your frontend URL
-  credentials: true, // Allow credentials (cookies, authorization headers)
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  origin: 'http://localhost:5173',
+  credentials: true,
+  optionsSuccessStatus: 200
 };
 
-// Middleware
-app.use(cors(corsOptions));
+// Middleware - ORDER MATTERS!
+app.use(cors(corsOptions)); // CORS first
+app.use(cookieParser());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -33,7 +36,5 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({ message: 'Something went wrong!' });
 });
-
-
 
 module.exports = app;

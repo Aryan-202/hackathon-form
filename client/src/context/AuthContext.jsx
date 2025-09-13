@@ -1,6 +1,6 @@
 // client/src/context/AuthContext.jsx
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { adminLogin } from "../api/adminApi";
+import { adminLogin, adminLogout } from "../api/adminApi"; // Added adminLogout import
 
 const AuthContext = createContext();
 
@@ -28,6 +28,8 @@ export function AuthProvider({ children }) {
       const response = await adminLogin(credentials);
       if (response.success) {
         setCurrentAdmin(response.admin);
+        // Store admin data in localStorage
+        localStorage.setItem("adminData", JSON.stringify(response.admin));
       }
       return response;
     } catch (error) {
@@ -46,6 +48,7 @@ export function AuthProvider({ children }) {
     } finally {
       setCurrentAdmin(null);
       localStorage.removeItem("adminToken");
+      localStorage.removeItem("adminData"); // Also remove adminData
     }
   };
 
@@ -53,11 +56,12 @@ export function AuthProvider({ children }) {
     currentAdmin,
     login,
     logout,
+    loading // Make sure to expose loading state
   };
 
   return (
     <AuthContext.Provider value={value}>
-      {!loading && children}
+      {children} {/* Remove the conditional rendering */}
     </AuthContext.Provider>
   );
 }

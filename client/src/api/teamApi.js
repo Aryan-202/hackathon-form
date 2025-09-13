@@ -17,7 +17,7 @@ export const registerTeam = async (teamData) => {
 
 export const verifyOTP = async (teamId, otpValues) => {
   try {
-    const response = await axios.post(`${API_URL}/teams/verify-otp`, {
+    const response = await axios.post(`${API_URL}/otp/verify`, {
       teamId,
       otpValues
     });

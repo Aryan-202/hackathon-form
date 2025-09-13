@@ -1,4 +1,3 @@
-// client/src/pages/Student/OTPVerify.jsx
 import React, { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { verifyOTP } from '../../api/teamApi';
@@ -12,27 +11,43 @@ const OTPVerify = () => {
   const [otpValues, setOtpValues] = useState({});
   const [message, setMessage] = useState('');
 
+  // Filter out the leader's email - only keep member emails
+  const memberEmails = emails ? emails.filter((email, index) => index !== 0) : [];
+
   const handleOtpChange = (email, value) => {
     setOtpValues({ ...otpValues, [email]: value });
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+  e.preventDefault();
+  setLoading(true);
+  setMessage(''); // Clear previous messages
+  
+  try {
+    console.log("Sending OTP verification:", { teamId, otpValues });
+    const response = await verifyOTP(teamId, otpValues);
+    console.log("OTP verification response:", response);
     
-    try {
-      const response = await verifyOTP(teamId, otpValues);
-      if (response.success) {
-        navigate('/student/success');
-      } else {
-        setMessage(response.message || 'Verification failed');
-      }
-    } catch (error) {
-      setMessage(error.response?.data?.message || 'Verification error');
-    } finally {
-      setLoading(false);
+    if (response.success) {
+      navigate('/student/success');
+    } else {
+      setMessage(response.message || 'Verification failed');
     }
-  };
+  } catch (error) {
+    console.error("OTP verification error details:", error);
+    console.error("Error response:", error.response);
+    
+    const errorMessage =
+      error.response?.data?.message ||
+      error.response?.data?.error ||
+      error.message ||
+      'Verification error';
+    
+    setMessage(errorMessage);
+  } finally {
+    setLoading(false);
+  }
+};
 
   if (!teamId || !emails) {
     return (
@@ -73,34 +88,44 @@ const OTPVerify = () => {
       <div className="max-w-md w-full">
         <div className="glass-form rounded-3xl p-8 text-white">
           <h2 className="text-3xl font-extrabold text-center mb-6">
-            Verify Email OTPs
+            Verify Member OTPs
           </h2>
           
-          <p className="text-center text-gray-300 mb-8">
-            Enter the OTPs sent to your team members' emails
+          <p className="text-center text-gray-300 mb-2">
+            OTPs have been sent to your team members' emails
+          </p>
+          
+          <p className="text-center text-blue-300 mb-6 text-sm">
+            Note: Team leader does not need to verify OTP
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {emails.map((email) => (
-              <div key={email} className="space-y-2">
-                <label className="block text-sm font-medium text-gray-300">
-                  {email}
-                </label>
-                <input
-                  type="text"
-                  value={otpValues[email] || ''}
-                  onChange={(e) => handleOtpChange(email, e.target.value)}
-                  className="form-input w-full px-4 py-3 rounded-lg"
-                  placeholder="Enter 6-digit OTP"
-                  maxLength="6"
-                  required
-                />
+            {memberEmails.length > 0 ? (
+              memberEmails.map((email, index) => (
+                <div key={email} className="space-y-2">
+                  <label className="block text-sm font-medium text-gray-300">
+                    Member {index + 1} - {email}
+                  </label>
+                  <input
+                    type="text"
+                    value={otpValues[email] || ''}
+                    onChange={(e) => handleOtpChange(email, e.target.value)}
+                    className="form-input w-full px-4 py-3 rounded-lg"
+                    placeholder="Enter 6-digit OTP"
+                    maxLength="6"
+                    required
+                  />
+                </div>
+              ))
+            ) : (
+              <div className="text-yellow-300 text-center p-4 bg-yellow-500 bg-opacity-10 rounded-lg">
+                No member emails found for OTP verification.
               </div>
-            ))}
+            )}
             
             <button
               type="submit"
-              disabled={loading}
+              disabled={loading || memberEmails.length === 0}
               className="w-full py-3 px-4 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? (

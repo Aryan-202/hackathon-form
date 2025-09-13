@@ -4,49 +4,65 @@ const Team = require('../models/Team');
 // Verify OTP for team member
 const verifyOTP = async (req, res) => {
   try {
-    const { email, otp } = req.body;
+    const { teamId, otpValues } = req.body;
 
-    if (!email || !otp) {
-      return res.status(400).json({ message: 'Email and OTP are required' });
+    if (!teamId || !otpValues || typeof otpValues !== 'object') {
+      return res.status(400).json({ message: 'Team ID and OTP values are required' });
     }
 
-    // Find valid OTP
-    const otpRecord = await OTP.findOne({ email, otp });
-
-    if (!otpRecord) {
-      return res.status(400).json({ message: 'Invalid or expired OTP' });
-    }
-
-    // Check if OTP is expired
-    if (otpRecord.expiresAt < new Date()) {
-      await OTP.findByIdAndDelete(otpRecord._id);
-      return res.status(400).json({ message: 'OTP has expired' });
-    }
-
-    // Update team member verification status
-    const team = await Team.findById(otpRecord.teamId);
+    const team = await Team.findById(teamId);
     if (!team) {
       return res.status(404).json({ message: 'Team not found' });
     }
 
-    const memberIndex = team.members.findIndex(m => m.email === email);
-    if (memberIndex === -1) {
-      return res.status(404).json({ message: 'Member not found in team' });
+    const verificationResults = [];
+    
+    // Verify each OTP
+    for (const [email, otp] of Object.entries(otpValues)) {
+      if (!otp) continue; // Skip if no OTP provided
+      
+      const otpRecord = await OTP.findOne({ email, otp, teamId });
+
+      if (!otpRecord) {
+        verificationResults.push({ email, success: false, message: 'Invalid OTP' });
+        continue;
+      }
+
+      if (otpRecord.expiresAt < new Date()) {
+        await OTP.findByIdAndDelete(otpRecord._id);
+        verificationResults.push({ email, success: false, message: 'OTP expired' });
+        continue;
+      }
+
+      // Update member verification status
+      const memberIndex = team.members.findIndex(m => m.email === email);
+      if (memberIndex !== -1) {
+        team.members[memberIndex].verified = true;
+        verificationResults.push({ email, success: true, message: 'OTP verified' });
+      }
+
+      // Delete used OTP
+      await OTP.findByIdAndDelete(otpRecord._id);
     }
 
-    team.members[memberIndex].verified = true;
     await team.save();
 
-    // Delete used OTP
-    await OTP.findByIdAndDelete(otpRecord._id);
+    // Check if any verifications failed
+    const failedVerifications = verificationResults.filter(result => !result.success);
+    
+    if (failedVerifications.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Some OTPs failed verification',
+        results: verificationResults
+      });
+    }
 
-    // Check if all members are verified
-    const allVerified = team.members.every(m => m.verified);
-    const message = allVerified 
-      ? 'OTP verified successfully. All team members are now verified.' 
-      : 'OTP verified successfully. Waiting for other members to verify.';
-
-    res.status(200).json({ message, team });
+    res.status(200).json({
+      success: true,
+      message: 'All OTPs verified successfully',
+      team
+    });
   } catch (error) {
     console.error('Verify OTP error:', error);
     res.status(500).json({ message: 'Server error while verifying OTP' });

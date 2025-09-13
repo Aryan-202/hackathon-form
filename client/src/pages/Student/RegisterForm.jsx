@@ -190,25 +190,26 @@ export default function RegisterForm() {
   };
 
   try {
-    console.log("Sending registration data:", dataToSend); // Debug log
+    console.log("Sending registration data:", dataToSend);
     const response = await registerTeam(dataToSend);
-    console.log("API Response:", response); // Debug log
+    console.log("API Response:", response);
     
-    if (response.success) {
-      console.log("Registration successful, redirecting to /student/verify-otp"); // Debug log
+    // Check for success based on the actual API response structure
+    if (response.teamId || response._id) {
+      console.log("Registration successful, redirecting to /student/verify-otp");
       // Navigate to verify-otp page with teamId and emails
       navigate("/student/verify-otp", {
         state: {
-          teamId: response.teamId || response.data?.teamId,
-          emails: response.emails || response.data?.emails,
+          teamId: response.teamId || response._id,
+          emails: response.emails || [formData.leader.email, ...membersToRegister.map(m => m.email)],
         },
       });
     } else {
-      console.log("Registration failed:", response.message); // Debug log
+      console.log("Registration failed:", response.message);
       setMessage(response.message || "Registration failed");
     }
   } catch (error) {
-    console.error("Registration error:", error); // Debug log
+    console.error("Registration error:", error);
     const errorMessage =
       error.response?.data?.message ||
       error.response?.data?.error ||
@@ -218,7 +219,6 @@ export default function RegisterForm() {
     setLoading(false);
   }
 };
-
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <style jsx="true">{`

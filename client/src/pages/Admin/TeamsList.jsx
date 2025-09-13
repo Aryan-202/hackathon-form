@@ -12,17 +12,23 @@ export default function TeamsList() {
   }, [filter]);
 
   const fetchTeams = async () => {
-    try {
-      const response = await getTeams(filter);
-      if (response.success) {
-        setTeams(response.teams);
-      }
-    } catch (error) {
-      console.error('Error fetching teams:', error);
-    } finally {
-      setLoading(false);
+  try {
+    console.log('Fetching teams with filter:', filter);
+    const response = await getTeams(filter);
+    console.log('API Response:', response);
+    
+    if (response.success) {
+      console.log('Teams received:', response.teams);
+      setTeams(response.teams);
+    } else {
+      console.log('API returned success: false');
     }
-  };
+  } catch (error) {
+    console.error('Error fetching teams:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const handleQualify = async (teamId) => {
     try {

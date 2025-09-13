@@ -111,6 +111,7 @@ const createTeam = async (req, res) => {
   }
 };
 
+
 // Get all teams (for admin)
 const getAllTeams = async (req, res) => {
   try {
@@ -134,10 +135,18 @@ const getAllTeams = async (req, res) => {
     }
 
     const teams = await Team.find(filter).sort({ createdAt: -1 });
-    res.status(200).json(teams);
+    
+    // Return the expected response structure
+    res.status(200).json({
+      success: true,
+      teams: teams
+    });
   } catch (error) {
     console.error('Get teams error:', error);
-    res.status(500).json({ message: 'Server error while fetching teams' });
+    res.status(500).json({ 
+      success: false,
+      message: 'Server error while fetching teams' 
+    });
   }
 };
 

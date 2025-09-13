@@ -28,7 +28,7 @@ export const adminLogin = async (credentials) => {
 
 export const getTeams = async (filter = "all") => {
   try {
-    const response = await axios.get(`${API_URL}/admin/teams?filter=${filter}`);
+    const response = await axios.get(`${API_URL}/teams?filter=${filter}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -49,7 +49,8 @@ export const adminLogout = async () => {
 export const qualifyTeam = async (teamId) => {
   try {
     const response = await axios.patch(
-      `${API_URL}/admin/teams/${teamId}/qualify`
+      `${API_URL}/teams/${teamId}/status`,
+      { status: 'qualified' }
     );
     return response.data;
   } catch (error) {
@@ -60,7 +61,7 @@ export const qualifyTeam = async (teamId) => {
 export const exportTeams = async (filter = "all") => {
   try {
     const response = await axios.get(
-      `${API_URL}/admin/export-teams?filter=${filter}`,
+      `${API_URL}/teams/export/excel?filter=${filter}`,
       {
         responseType: "blob",
       }

@@ -11,7 +11,7 @@ axios.defaults.withCredentials = true;
 
 export const registerTeam = async (teamData) => {
   try {
-    const response = await axios.post(`${API_URL}/teams`, teamData); // Remove /register
+    const response = await axios.post(`${API_URL}/api/teams`, teamData); // Remove /register
     return response.data;
   } catch (error) {
     throw error;
@@ -20,7 +20,7 @@ export const registerTeam = async (teamData) => {
 
 export const verifyOTP = async (teamId, otpValues) => {
   try {
-    const response = await axios.post(`${API_URL}/otp/verify`, {
+    const response = await axios.post(`${API_URL}/api/otp/verify`, {
       teamId,
       otpValues
     });

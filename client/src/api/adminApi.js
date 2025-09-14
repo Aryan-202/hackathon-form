@@ -28,7 +28,7 @@ export const adminLogin = async (credentials) => {
 
 export const getTeams = async (filter = "all") => {
   try {
-    const response = await axios.get(`${API_URL}/teams?filter=${filter}`);
+    const response = await axios.get(`${API_URL}/api/teams?filter=${filter}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -37,7 +37,7 @@ export const getTeams = async (filter = "all") => {
 
 export const adminLogout = async () => {
   try {
-    const response = await axios.post(`${API_URL}/auth/logout`);
+    const response = await axios.post(`${API_URL}/api/auth/logout`);
     localStorage.removeItem('adminToken');
     return response.data;
   } catch (error) {

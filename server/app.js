@@ -11,10 +11,9 @@ const app = express();
 
 const corsOptions = {
   origin: [
-    'https://hackathon-form-zeta.vercel.app', 
-    'http://localhost:5173' 
+    '*'
   ],
-  credentials: true,
+  credentials: false,
   optionsSuccessStatus: 200
 };
 

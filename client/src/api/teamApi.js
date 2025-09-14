@@ -4,7 +4,7 @@ import axios from 'axios';
 console.log('Environment variables:', import.meta.env);
 console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 // Set up axios defaults
 axios.defaults.withCredentials = true;

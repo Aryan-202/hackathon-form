@@ -16,7 +16,7 @@ axios.interceptors.request.use((config) => {
 
 export const adminLogin = async (credentials) => {
   try {
-    const response = await axios.post(`${API_URL}/auth/login`, credentials);
+    const response = await axios.post(`${API_URL}/api/auth/login`, credentials);
     if (response.data.token) {
       localStorage.setItem("adminToken", response.data.token);
     }

@@ -10,7 +10,10 @@ const otpRoutes = require('./routes/otpRoutes');
 const app = express();
 
 const corsOptions = {
-  origin: 'http://localhost:5173',
+  origin: [
+    'https://hackathon-form-zeta.vercel.app', 
+    'http://localhost:5173' 
+  ],
   credentials: true,
   optionsSuccessStatus: 200
 };
